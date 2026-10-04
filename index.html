@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Custom Tiles - Sliding Puzzle</title>
-    <!-- Custom Game Favicon[span_0](start_span)[span_0](end_span) -->
+    <!-- Custom Game Favicon[span_2](start_span)[span_2](end_span) -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23f59e0b'/><rect x='15' y='15' width='32' height='32' rx='8' fill='%23ffffff'/><rect x='53' y='15' width='32' height='32' rx='8' fill='%23ec4899'/><rect x='15' y='53' width='32' height='32' rx='8' fill='%234f46e5'/><rect x='53' y='53' width='32' height='32' rx='8' fill='%231e293b' opacity='0.4'/></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -31,14 +31,15 @@
 </head>
 <body class="bg-gradient-to-br from-amber-950 via-slate-950 to-purple-950 text-white flex flex-col justify-between">
 
-    <!-- Full Screen Splash Screen (Clear artwork with lower transparent play button) -->
-    <div id="splash-screen" class="fixed inset-0 z-50 flex flex-col justify-end items-center pb-10 px-8 bg-cover bg-center" style="background-image: url('tiles.jpg');">
+    <!-- Full Screen Splash Screen[span_3](start_span)[span_3](end_span) -->
+    <div id="splash-screen" class="fixed inset-0 z-50 flex flex-col justify-end items-center pb-16 px-8 bg-cover bg-center" style="background-image: url('tiles.jpg');">
+        <h1 class="text-3xl font-extrabold text-white tracking-widest mb-3 drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)] text-center">CUSTOM TILES</h1>
         <button id="start-game-btn" class="bg-transparent hover:bg-white/15 text-white font-medium text-sm py-2 px-6 rounded-xl transition transform active:scale-95 border border-white/70 shadow-[0_4px_12px_rgba(0,0,0,0.5)]">
             Play Now
         </button>
     </div>
 
-    <!-- Top Gameplay Header Bar -->
+    <!-- Top Gameplay Header Bar[span_4](start_span)[span_4](end_span) -->
     <header class="w-full px-4 py-3 flex items-center justify-between z-20 bg-slate-900/60 backdrop-blur-md border-b border-white/10 shrink-0">
         <!-- Stats -->
         <div class="flex items-center space-x-2 bg-black/40 px-3 py-1.5 rounded-xl border border-white/10 text-xs font-mono">
@@ -47,9 +48,8 @@
             <span id="moves" class="text-pink-300">0 moves</span>
         </div>
 
-        <!-- Gameplay Board Buttons -->
+        <!-- Gameplay Board Buttons[span_5](start_span)[span_5](end_span) -->
         <div class="flex items-center space-x-2">
-            <!-- Press to view preview button -->
             <button id="board-preview-btn" class="bg-amber-600/80 hover:bg-amber-600 text-white px-3 py-1.5 rounded-xl text-xs font-semibold transition shadow-md border border-amber-500/30 flex items-center space-x-1 cursor-pointer">
                 <span>Hold Preview</span>
             </button>
@@ -65,12 +65,12 @@
         </div>
     </header>
 
-    <!-- Main Game Canvas Container -->
+    <!-- Main Game Canvas Container[span_6](start_span)[span_6](end_span) -->
     <main class="w-full flex-1 relative flex items-center justify-center p-0 overflow-hidden">
         <canvas id="gameCanvas" class="w-full h-full object-contain drop-shadow-2xl"></canvas>
     </main>
 
-    <!-- Options Splash Screen Modal -->
+    <!-- Options Splash Screen Modal[span_7](start_span)[span_7](end_span) -->
     <div id="options-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-40 flex items-center justify-center p-4 hidden">
         <div class="bg-slate-900 border border-white/20 rounded-3xl max-w-sm w-full p-6 shadow-2xl flex flex-col gap-4 relative">
             
@@ -79,7 +79,7 @@
                 <p class="text-xs text-amber-300">Configure grid size & background</p>
             </div>
 
-            <!-- Grid Size Selection -->
+            <!-- Grid Size Selection[span_8](start_span)[span_8](end_span) -->
             <div class="bg-black/30 p-3 rounded-xl border border-white/5 flex flex-col gap-2">
                 <span class="text-amber-200 text-xs font-medium text-center">Grid Size:</span>
                 <div class="grid grid-cols-3 gap-2">
@@ -91,7 +91,7 @@
                 </div>
             </div>
 
-            <!-- Actions -->
+            <!-- Actions[span_9](start_span)[span_9](end_span) -->
             <div class="grid grid-cols-2 gap-3">
                 <button id="modal-restart-btn" class="col-span-2 bg-purple-600/80 hover:bg-purple-600 text-white py-2.5 rounded-xl text-sm font-medium transition shadow-md border border-purple-500/30">Shuffle & Reset</button>
                 
@@ -104,13 +104,17 @@
                 </label>
             </div>
 
-            <!-- Presets -->
+            <!-- Presets (Updated with uploaded folder images) -->
             <div class="bg-black/20 p-2.5 rounded-xl border border-white/5">
                 <span class="text-xs text-amber-200 font-medium mb-2 block text-center">Presets:</span>
-                <div class="flex items-center justify-center space-x-3">
-                    <button onclick="switchDefaultImage('tiles.jpg')" class="w-10 h-10 rounded-lg overflow-hidden border-2 border-transparent hover:border-amber-400 hover:scale-105 transition"><img src="tiles.jpg" class="w-full h-full object-cover" alt="Preset Splash"></button>
-                    <button onclick="switchDefaultImage('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80')" class="w-10 h-10 rounded-lg overflow-hidden border-2 border-transparent hover:border-amber-400 hover:scale-105 transition"><img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=150&q=80" class="w-full h-full object-cover" alt="Preset 1"></button>
-                    <button onclick="switchDefaultImage('https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=1200&q=80')" class="w-10 h-10 rounded-lg overflow-hidden border-2 border-transparent hover:border-amber-400 hover:scale-105 transition"><img src="https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=150&q=80" class="w-full h-full object-cover" alt="Preset 2"></button>
+                <div class="grid grid-cols-4 gap-2">
+                    <button onclick="switchDefaultImage('tiles.jpg')" class="w-full h-10 rounded-lg overflow-hidden border-2 border-transparent hover:border-amber-400 hover:scale-105 transition"><img src="tiles.jpg" class="w-full h-full object-cover" alt="Tiles"></button>
+                    <button onclick="switchDefaultImage('Cars.jpg')" class="w-full h-10 rounded-lg overflow-hidden border-2 border-transparent hover:border-amber-400 hover:scale-105 transition"><img src="Cars.jpg" class="w-full h-full object-cover" alt="Cars"></button>
+                    <button onclick="switchDefaultImage('Plumber.jpg')" class="w-full h-10 rounded-lg overflow-hidden border-2 border-transparent hover:border-amber-400 hover:scale-105 transition"><img src="Plumber.jpg" class="w-full h-full object-cover" alt="Plumber"></button>
+                    <button onclick="switchDefaultImage('Poppy.jpg')" class="w-full h-10 rounded-lg overflow-hidden border-2 border-transparent hover:border-amber-400 hover:scale-105 transition"><img src="Poppy.jpg" class="w-full h-full object-cover" alt="Poppy"></button>
+                    <button onclick="switchDefaultImage('Ship.jpg')" class="w-full h-10 rounded-lg overflow-hidden border-2 border-transparent hover:border-amber-400 hover:scale-105 transition"><img src="Ship.jpg" class="w-full h-full object-cover" alt="Ship"></button>
+                    <button onclick="switchDefaultImage('Girl.jpg')" class="w-full h-10 rounded-lg overflow-hidden border-2 border-transparent hover:border-amber-400 hover:scale-105 transition"><img src="Girl.jpg" class="w-full h-full object-cover" alt="Girl"></button>
+                    <button onclick="switchDefaultImage('Bazz.jpg')" class="w-full h-10 rounded-lg overflow-hidden border-2 border-transparent hover:border-amber-400 hover:scale-105 transition"><img src="Bazz.jpg" class="w-full h-full object-cover" alt="Bazz"></button>
                 </div>
             </div>
 
@@ -118,7 +122,7 @@
         </div>
     </div>
 
-    <!-- Cropped Preview Modal (Used for Press-and-Hold Preview) -->
+    <!-- Cropped Preview Modal[span_10](start_span)[span_10](end_span) -->
     <div id="preview-modal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden pointer-events-none">
         <div class="bg-slate-900 border border-white/20 rounded-2xl max-w-lg w-full p-5 relative shadow-2xl flex flex-col items-center">
             <h3 class="text-lg font-bold mb-1 text-white">Target Picture Preview</h3>
@@ -129,7 +133,7 @@
         </div>
     </div>
 
-    <!-- Victory Modal -->
+    <!-- Victory Modal[span_11](start_span)[span_11](end_span) -->
     <div id="victory-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-gradient-to-br from-amber-950 via-slate-900 to-purple-900 border border-amber-500/40 rounded-3xl max-w-md w-full p-8 text-center relative shadow-2xl">
             <div class="w-16 h-16 bg-gradient-to-tr from-yellow-400 to-amber-500 rounded-2xl mx-auto flex items-center justify-center shadow-lg shadow-amber-500/30 mb-4 animate-bounce">
@@ -555,7 +559,7 @@
             }
         });
 
-        // Press-and-Hold Preview Button Logic
+        // Press-and-Hold Preview Button Logic[span_12](start_span)[span_12](end_span)
         const previewBtn = document.getElementById('board-preview-btn');
         const previewModal = document.getElementById('preview-modal');
         const previewImg = document.getElementById('preview-img');
@@ -577,7 +581,7 @@
         previewBtn.addEventListener('pointercancel', hidePreview);
         previewBtn.addEventListener('pointerleave', hidePreview);
 
-        // Splash Screen Start
+        // Splash Screen Start[span_13](start_span)[span_13](end_span)
         document.getElementById('start-game-btn').addEventListener('click', () => {
             document.getElementById('splash-screen').classList.add('hidden');
         });
