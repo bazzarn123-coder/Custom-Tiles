@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Custom Tiles - Sliding Puzzle</title>
+    <!-- Custom Game Favicon[span_1](start_span)[span_1](end_span) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23f59e0b'/><rect x='15' y='15' width='32' height='32' rx='8' fill='%23ffffff'/><rect x='53' y='15' width='32' height='32' rx='8' fill='%23ec4899'/><rect x='15' y='53' width='32' height='32' rx='8' fill='%234f46e5'/><rect x='53' y='53' width='32' height='32' rx='8' fill='%231e293b' opacity='0.4'/></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100dvh;
+            width: 100vw;
+            overflow: hidden;
+            position: fixed;
+            margin: 0;
+            padding: 0;
+            background-color: #0f172a;
+            font-family: 'Outfit', sans-serif;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+            overscroll-behavior: none;
+        }
+        canvas {
+            touch-action: none;
+            overscroll-behavior: none;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-amber-950 via-slate-950 to-purple-950 text-white flex flex-col justify-between">
+
+    <!-- Full Screen Splash Screen (Clear artwork with only the Play Now button) -->
+    <div id="splash-screen" class="fixed inset-0 z-50 flex flex-col justify-end items-center p-8 bg-cover bg-center" style="background-image: url('tiles.jpg');">
+        <button id="start-game-btn" class="mb-12 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-extrabold text-xl py-4 px-14 rounded-2xl shadow-2xl transition transform active:scale-95 border-2 border-white/90">
+            PLAY NOW
+        </button>
+    </div>
+
+    <!-- Top Gameplay Header Bar -->
+    <header class="w-full px-4 py-3 flex items-center justify-between z-20 bg-slate-900/60 backdrop-blur-md border-b border-white/10 shrink-0">
+        <!-- Stats -->
+        <div class="flex items-center space-x-2 bg-black/40 px-3 py-1.5 rounded-xl border border-white/10 text-xs font-mono">
+            <span id="timer" class="text-amber-300">00:00</span>
+            <span class="text-white/30">|</span>
+            <span id="moves" class="text-pink-300">0 moves</span>
+        </div>
+
+        <!-- Gameplay Board Buttons -->
+        <div class="flex items-center space-x-2">
+            <!-- Press to view preview button -->
+            <button id="board-preview-btn" class="bg-amber-600/80 hover:bg-amber-600 text-white px-3 py-1.5 rounded-xl text-xs font-semibold transition shadow-md border border-amber-500/30 flex items-center space-x-1 cursor-pointer">
+                <span>Hold Preview</span>
+            </button>
+            <button id="board-restart-btn" class="bg-purple-600/80 hover:bg-purple-600 text-white px-3 py-1.5 rounded-xl text-xs font-semibold transition shadow-md border border-purple-500/30 flex items-center space-x-1">
+                <span>Shuffle</span>
+            </button>
+            <button id="options-btn" class="bg-black/50 hover:bg-black/70 backdrop-blur-md p-2 rounded-xl transition shadow-xl border border-white/20 flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Game Canvas Container -->
+    <main class="w-full flex-1 relative flex items-center justify-center p-0 overflow-hidden">
+        <canvas id="gameCanvas" class="w-full h-full object-contain drop-shadow-2xl"></canvas>
+    </main>
+
+    <!-- Options Splash Screen Modal -->
+    <div id="options-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-40 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-white/20 rounded-3xl max-w-sm w-full p-6 shadow-2xl flex flex-col gap-4 relative">
+            
+            <div class="text-center">
+                <h2 class="text-2xl font-bold text-white mb-1">Sliding Puzzle</h2>
+                <p class="text-xs text-amber-300">Configure grid size & background</p>
+            </div>
+
+            <!-- Grid Size Selection -->
+            <div class="bg-black/30 p-3 rounded-xl border border-white/5 flex flex-col gap-2">
+                <span class="text-amber-200 text-xs font-medium text-center">Grid Size:</span>
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="changeGridSize(3, 3)" id="btn-3x3" class="bg-amber-600 text-white py-1.5 rounded-lg text-xs font-semibold transition shadow-md">3 x 3</button>
+                    <button onclick="changeGridSize(3, 4)" id="btn-3x4" class="bg-slate-700 hover:bg-slate-600 text-white py-1.5 rounded-lg text-xs font-semibold transition shadow-md">3 x 4</button>
+                    <button onclick="changeGridSize(4, 5)" id="btn-4x5" class="bg-slate-700 hover:bg-slate-600 text-white py-1.5 rounded-lg text-xs font-semibold transition shadow-md">4 x 5</button>
+                    <button onclick="changeGridSize(5, 6)" id="btn-5x6" class="bg-slate-700 hover:bg-slate-600 text-white py-1.5 rounded-lg text-xs font-semibold transition shadow-md">5 x 6</button>
+                    <button onclick="changeGridSize(6, 8)" id="btn-6x8" class="bg-slate-700 hover:bg-slate-600 text-white py-1.5 rounded-lg text-xs font-semibold transition shadow-md col-span-2">6 x 8 (Max)</button>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="grid grid-cols-2 gap-3">
+                <button id="modal-restart-btn" class="col-span-2 bg-purple-600/80 hover:bg-purple-600 text-white py-2.5 rounded-xl text-sm font-medium transition shadow-md border border-purple-500/30">Shuffle & Reset</button>
+                
+                <label class="col-span-2 bg-gradient-to-r from-pink-500 to-rose-500 hover:opacity-90 text-white py-3 rounded-xl text-sm font-semibold transition shadow-md cursor-pointer text-center flex items-center justify-center space-x-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <span>Upload Picture</span>
+                    <input type="file" id="image-upload" accept="image/*" class="hidden">
+                </label>
+            </div>
+
+            <!-- Presets -->
+            <div class="bg-black/20 p-2.5 rounded-xl border border-white/5">
+                <span class="text-xs text-amber-200 font-medium mb-2 block text-center">Presets:</span>
+                <div class="flex items-center justify-center space-x-3">
+                    <button onclick="switchDefaultImage('tiles.jpg')" class="w-10 h-10 rounded-lg overflow-hidden border-2 border-transparent hover:border-amber-400 hover:scale-105 transition"><img src="tiles.jpg" class="w-full h-full object-cover" alt="Preset Splash"></button>
+                    <button onclick="switchDefaultImage('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80')" class="w-10 h-10 rounded-lg overflow-hidden border-2 border-transparent hover:border-amber-400 hover:scale-105 transition"><img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=150&q=80" class="w-full h-full object-cover" alt="Preset 1"></button>
+                    <button onclick="switchDefaultImage('https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=1200&q=80')" class="w-10 h-10 rounded-lg overflow-hidden border-2 border-transparent hover:border-amber-400 hover:scale-105 transition"><img src="https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=150&q=80" class="w-full h-full object-cover" alt="Preset 2"></button>
+                </div>
+            </div>
+
+            <button id="close-options-btn" class="w-full bg-white/10 hover:bg-white/20 text-white py-2.5 rounded-xl font-semibold transition border border-white/10">Resume Game</button>
+        </div>
+    </div>
+
+    <!-- Cropped Preview Modal (Used for Press-and-Hold Preview) -->
+    <div id="preview-modal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden pointer-events-none">
+        <div class="bg-slate-900 border border-white/20 rounded-2xl max-w-lg w-full p-5 relative shadow-2xl flex flex-col items-center">
+            <h3 class="text-lg font-bold mb-1 text-white">Target Picture Preview</h3>
+            <p class="text-xs text-amber-300 mb-3">Release button to return to gameplay</p>
+            <div id="preview-container" class="rounded-xl overflow-hidden border border-white/25 max-h-[60vh] max-w-[80vw] flex items-center justify-center mb-2 bg-black/50">
+                <img id="preview-img" src="" alt="Cropped Preview" class="object-cover rounded-lg shadow-lg">
+            </div>
+        </div>
+    </div>
+
+    <!-- Victory Modal -->
+    <div id="victory-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-gradient-to-br from-amber-950 via-slate-900 to-purple-900 border border-amber-500/40 rounded-3xl max-w-md w-full p-8 text-center relative shadow-2xl">
+            <div class="w-16 h-16 bg-gradient-to-tr from-yellow-400 to-amber-500 rounded-2xl mx-auto flex items-center justify-center shadow-lg shadow-amber-500/30 mb-4 animate-bounce">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-white mb-1">Puzzle Solved! 🎉</h2>
+            <p class="text-amber-200 text-sm mb-6">Fantastic job sliding the tiles into place!</p>
+            <div class="bg-black/30 rounded-2xl p-4 border border-white/10 flex justify-around mb-6">
+                <div>
+                    <p class="text-xs text-slate-400">Time Taken</p>
+                    <p id="final-time" class="text-lg font-mono font-bold text-amber-300">00:00</p>
+                </div>
+                <div class="w-px bg-white/10"></div>
+                <div>
+                    <p class="text-xs text-slate-400">Total Moves</p>
+                    <p id="final-moves" class="text-lg font-mono font-bold text-pink-300">0</p>
+                </div>
+            </div>
+            <button id="play-again-btn" class="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:opacity-90 text-slate-950 font-bold py-3 rounded-xl transition shadow-lg">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        let COLS = 3;
+        let ROWS = 3;
+
+        const LOGICAL_WIDTH = 900;
+        const LOGICAL_HEIGHT = 1150;
+
+        let tileSize = 0;
+        let boardW = 0;
+        let boardH = 0;
+        let boardX = 0;
+        let boardY = 0;
+
+        let currentImageSrc = 'tiles.jpg';
+        let img = new Image();
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = LOGICAL_WIDTH;
+        canvas.height = LOGICAL_HEIGHT;
+
+        let grid = [];
+        let emptyR = 0;
+        let emptyC = 0;
+
+        let startTime = null;
+        let timerInterval = null;
+        let secondsElapsed = 0;
+        let moveCount = 0;
+        let gameStarted = false;
+        let isWon = false;
+
+        let touchStartR = null;
+        let touchStartC = null;
+        let pointerStartX = 0;
+        let pointerStartY = 0;
+        let dragOffsetX = 0;
+        let dragOffsetY = 0;
+        let isAnimating = false;
+        let rafId = null;
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSlideSound() {
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(320, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(160, audioCtx.currentTime + 0.06);
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.06);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.06);
+            } catch(e) {}
+        }
+
+        function updateBoardDimensions() {
+            const maxW = 760;
+            const maxH = 920;
+            const sizeByW = maxW / COLS;
+            const sizeByH = maxH / ROWS;
+            tileSize = Math.min(sizeByW, sizeByH);
+
+            boardW = tileSize * COLS;
+            boardH = tileSize * ROWS;
+            boardX = (LOGICAL_WIDTH - boardW) / 2;
+            boardY = (LOGICAL_HEIGHT - boardH) / 2;
+        }
+
+        function changeGridSize(cols, rows) {
+            COLS = cols;
+            ROWS = rows;
+
+            const sizes = [[3,3], [3,4], [4,5], [5,6], [6,8]];
+            sizes.forEach(([c, r]) => {
+                const btn = document.getElementById(`btn-${c}x${r}`);
+                if (btn) {
+                    btn.className = (c === COLS && r === ROWS) 
+                        ? "bg-amber-600 text-white py-1.5 rounded-lg text-xs font-semibold transition shadow-md" 
+                        : "bg-slate-700 hover:bg-slate-600 text-white py-1.5 rounded-lg text-xs font-semibold transition shadow-md";
+                }
+            });
+
+            updateBoardDimensions();
+            initGame();
+        }
+
+        function initGame() {
+            isWon = false;
+            moveCount = 0;
+            gameStarted = false;
+            secondsElapsed = 0;
+            isAnimating = false;
+            if (rafId) cancelAnimationFrame(rafId);
+            document.getElementById('moves').innerText = '0 moves';
+            document.getElementById('timer').innerText = '00:00';
+            if (timerInterval) clearInterval(timerInterval);
+
+            grid = [];
+            for (let r = 0; r < ROWS; r++) {
+                grid[r] = [];
+                for (let c = 0; c < COLS; c++) {
+                    grid[r][c] = { origR: r, origC: c };
+                }
+            }
+            emptyR = ROWS - 1;
+            emptyC = COLS - 1;
+            grid[emptyR][emptyC] = null;
+
+            const shuffleSteps = COLS * ROWS * 40;
+            for (let i = 0; i < shuffleSteps; i++) {
+                const neighbors = [];
+                if (emptyR > 0) neighbors.push({r: emptyR - 1, c: emptyC});
+                if (emptyR < ROWS - 1) neighbors.push({r: emptyR + 1, c: emptyC});
+                if (emptyC > 0) neighbors.push({r: emptyR, c: emptyC - 1});
+                if (emptyC < COLS - 1) neighbors.push({r: emptyR, c: emptyC + 1});
+
+                const randomNeighbor = neighbors[Math.floor(Math.random() * neighbors.length)];
+                grid[emptyR][emptyC] = grid[randomNeighbor.r][randomNeighbor.c];
+                emptyR = randomNeighbor.r;
+                emptyC = randomNeighbor.c;
+                grid[emptyR][emptyC] = null;
+            }
+
+            dragOffsetX = 0;
+            dragOffsetY = 0;
+            touchStartR = null;
+            touchStartC = null;
+            redraw();
+        }
+
+        function startTimer() {
+            if (gameStarted) return;
+            gameStarted = true;
+            startTime = Date.now();
+            timerInterval = setInterval(() => {
+                secondsElapsed = Math.floor((Date.now() - startTime) / 1000);
+                const mins = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+                const secs = String(secondsElapsed % 60).padStart(2, '0');
+                document.getElementById('timer').innerText = `${mins}:${secs}`;
+            }, 1000);
+        }
+
+        function getCropParams() {
+            const gridAspect = COLS / ROWS;
+            const imgAspect = img.width / img.height;
+            let srcW, srcH, srcX, srcY;
+
+            if (imgAspect > gridAspect) {
+                srcH = img.height;
+                srcW = img.height * gridAspect;
+                srcX = (img.width - srcW) / 2;
+                srcY = 0;
+            } else {
+                srcW = img.width;
+                srcH = img.width / gridAspect;
+                srcX = 0;
+                srcY = (img.height - srcH) / 2;
+            }
+            return { srcX, srcY, srcW, srcH };
+        }
+
+        function redraw() {
+            ctx.clearRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.beginPath();
+            ctx.roundRect(boardX - 8, boardY - 8, boardW + 16, boardH + 16, 16);
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(boardX, boardY, boardW, boardH);
+            ctx.clip();
+
+            const { srcX, srcY, srcW, srcH } = getCropParams();
+            const sliceW = srcW / COLS;
+            const sliceH = srcH / ROWS;
+
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    const tile = grid[r][c];
+                    let x = boardX + c * tileSize;
+                    let y = boardY + r * tileSize;
+
+                    if (tile === null) {
+                        ctx.fillStyle = 'rgba(15, 23, 42, 0.6)';
+                        ctx.fillRect(x, y, tileSize, tileSize);
+                        continue;
+                    }
+
+                    let drawX = x;
+                    let drawY = y;
+                    if (touchStartR !== null && touchStartC !== null) {
+                        if (r === emptyR && touchStartR === emptyR && c >= Math.min(touchStartC, emptyC) && c <= Math.max(touchStartC, emptyC)) {
+                            drawX += dragOffsetX;
+                        } else if (c === emptyC && touchStartC === emptyC && r >= Math.min(touchStartR, emptyR) && r <= Math.max(touchStartR, emptyR)) {
+                            drawY += dragOffsetY;
+                        }
+                    }
+
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.rect(drawX + 2, drawY + 2, tileSize - 4, tileSize - 4);
+                    ctx.clip();
+
+                    ctx.drawImage(
+                        img,
+                        srcX + tile.origC * sliceW,
+                        srcY + tile.origR * sliceH,
+                        sliceW,
+                        sliceH,
+                        drawX, drawY, tileSize, tileSize
+                    );
+                    ctx.restore();
+
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(drawX + 2, drawY + 2, tileSize - 4, tileSize - 4);
+                }
+            }
+            ctx.restore();
+        }
+
+        function checkWin() {
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    if (r === ROWS - 1 && c === COLS - 1) {
+                        if (grid[r][c] !== null) return false;
+                    } else {
+                        const tile = grid[r][c];
+                        if (!tile || tile.origR !== r || tile.origC !== c) return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        function triggerVictory() {
+            isWon = true;
+            clearInterval(timerInterval);
+            document.getElementById('final-time').innerText = document.getElementById('timer').innerText;
+            document.getElementById('final-moves').innerText = `${moveCount}`;
+            document.getElementById('victory-modal').classList.remove('hidden');
+        }
+
+        function executeSlide(startR, startC) {
+            if (startR === emptyR) {
+                if (startC < emptyC) {
+                    for (let c = emptyC; c > startC; c--) {
+                        grid[emptyR][c] = grid[emptyR][c - 1];
+                    }
+                    grid[emptyR][startC] = null;
+                    emptyC = startC;
+                    moveCount++;
+                } else if (startC > emptyC) {
+                    for (let c = emptyC; c < startC; c++) {
+                        grid[emptyR][c] = grid[emptyR][c + 1];
+                    }
+                    grid[emptyR][startC] = null;
+                    emptyC = startC;
+                    moveCount++;
+                }
+            } else if (startC === emptyC) {
+                if (startR < emptyR) {
+                    for (let r = emptyR; r > startR; r--) {
+                        grid[r][emptyC] = grid[r - 1][emptyC];
+                    }
+                    grid[startR][emptyC] = null;
+                    emptyR = startR;
+                    moveCount++;
+                } else if (startR > emptyR) {
+                    for (let r = emptyR; r < startR; r++) {
+                        grid[r][emptyC] = grid[r + 1][emptyC];
+                    }
+                    grid[startR][emptyC] = null;
+                    emptyR = startR;
+                    moveCount++;
+                }
+            }
+            document.getElementById('moves').innerText = `${moveCount} moves`;
+        }
+
+        function animateSnapBack() {
+            if (!isAnimating) return;
+            dragOffsetX *= 0.65;
+            dragOffsetY *= 0.65;
+            redraw();
+            if (Math.abs(dragOffsetX) < 0.5 && Math.abs(dragOffsetY) < 0.5) {
+                dragOffsetX = 0;
+                dragOffsetY = 0;
+                touchStartR = null;
+                touchStartC = null;
+                isAnimating = false;
+                redraw();
+            } else {
+                requestAnimationFrame(animateSnapBack);
+            }
+        }
+
+        canvas.addEventListener('pointerdown', (e) => {
+            if (isWon || isAnimating) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const clickX = (e.clientX - rect.left) * scaleX;
+            const clickY = (e.clientY - rect.top) * scaleY;
+
+            if (clickX < boardX || clickX > boardX + boardW || clickY < boardY || clickY > boardY + boardH) {
+                return;
+            }
+
+            const c = Math.floor((clickX - boardX) / tileSize);
+            const r = Math.floor((clickY - boardY) / tileSize);
+
+            if (r === emptyR || c === emptyC) {
+                startTimer();
+                touchStartR = r;
+                touchStartC = c;
+                pointerStartX = clickX;
+                pointerStartY = clickY;
+                canvas.setPointerCapture(e.pointerId);
+            }
+        });
+
+        canvas.addEventListener('pointermove', (e) => {
+            if (touchStartR === null || touchStartC === null || isAnimating) return;
+            e.preventDefault();
+
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const currentX = (e.clientX - rect.left) * scaleX;
+            const currentY = (e.clientY - rect.top) * scaleY;
+
+            const rawDx = currentX - pointerStartX;
+            const rawDy = currentY - pointerStartY;
+
+            if (touchStartR === emptyR) {
+                const diff = emptyC - touchStartC;
+                const minD = diff < 0 ? diff * tileSize : 0;
+                const maxD = diff > 0 ? diff * tileSize : 0;
+                dragOffsetX = Math.max(minD, Math.min(rawDx, maxD));
+                dragOffsetY = 0;
+            } else if (touchStartC === emptyC) {
+                const diff = emptyR - touchStartR;
+                const minD = diff < 0 ? diff * tileSize : 0;
+                const maxD = diff > 0 ? diff * tileSize : 0;
+                dragOffsetY = Math.max(minD, Math.min(rawDy, maxD));
+                dragOffsetX = 0;
+            }
+
+            if (!rafId) {
+                rafId = requestAnimationFrame(() => {
+                    redraw();
+                    rafId = null;
+                });
+            }
+        });
+
+        canvas.addEventListener('pointerup', (e) => {
+            if (touchStartR === null || touchStartC === null || isAnimating) return;
+            canvas.releasePointerCapture(e.pointerId);
+
+            const currentDrag = touchStartR === emptyR ? Math.abs(dragOffsetX) : Math.abs(dragOffsetY);
+            const totalDistance = Math.abs(touchStartR === emptyR ? (emptyC - touchStartC) * tileSize : (emptyR - touchStartR) * tileSize);
+            
+            const committed = currentDrag > (totalDistance * 0.2) || currentDrag > 12;
+
+            if (committed) {
+                executeSlide(touchStartR, touchStartC);
+                playSlideSound();
+                touchStartR = null;
+                touchStartC = null;
+                dragOffsetX = 0;
+                dragOffsetY = 0;
+                redraw();
+
+                if (checkWin()) {
+                    setTimeout(triggerVictory, 300);
+                }
+            } else {
+                isAnimating = true;
+                animateSnapBack();
+            }
+        });
+
+        canvas.addEventListener('pointercancel', (e) => {
+            if (touchStartR !== null && !isAnimating) {
+                isAnimating = true;
+                animateSnapBack();
+            }
+        });
+
+        // Press-and-Hold Preview Button Logic
+        const previewBtn = document.getElementById('board-preview-btn');
+        const previewModal = document.getElementById('preview-modal');
+        const previewImg = document.getElementById('preview-img');
+
+        function showPreview(e) {
+            e.preventDefault();
+            previewImg.src = currentImageSrc;
+            previewImg.style.aspectRatio = `${COLS} / ${ROWS}`;
+            previewModal.classList.remove('hidden');
+        }
+
+        function hidePreview(e) {
+            if(e) e.preventDefault();
+            previewModal.classList.add('hidden');
+        }
+
+        previewBtn.addEventListener('pointerdown', showPreview);
+        previewBtn.addEventListener('pointerup', hidePreview);
+        previewBtn.addEventListener('pointercancel', hidePreview);
+        previewBtn.addEventListener('pointerleave', hidePreview);
+
+        // Splash Screen Start
+        document.getElementById('start-game-btn').addEventListener('click', () => {
+            document.getElementById('splash-screen').classList.add('hidden');
+        });
+
+        function switchDefaultImage(src) {
+            currentImageSrc = src;
+            img.src = currentImageSrc;
+            document.getElementById('options-modal').classList.add('hidden');
+        }
+
+        document.getElementById('options-btn').addEventListener('click', () => {
+            document.getElementById('options-modal').classList.remove('hidden');
+        });
+        
+        document.getElementById('close-options-btn').addEventListener('click', () => {
+            document.getElementById('options-modal').classList.add('hidden');
+        });
+
+        document.getElementById('board-restart-btn').addEventListener('click', () => {
+            initGame();
+        });
+        document.getElementById('modal-restart-btn').addEventListener('click', () => {
+            initGame();
+            document.getElementById('options-modal').classList.add('hidden');
+        });
+
+        document.getElementById('image-upload').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    currentImageSrc = event.target.result;
+                    img.src = currentImageSrc;
+                    document.getElementById('options-modal').classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('play-again-btn').addEventListener('click', () => {
+            document.getElementById('victory-modal').classList.add('hidden');
+            initGame();
+        });
+
+        img.onload = () => {
+            updateBoardDimensions();
+            initGame();
+        };
+        img.src = currentImageSrc;
+    </script>
+</body>
+</html>
