@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Custom Tiles - Sliding Puzzle</title>
-    <!-- Custom Game Favicon[span_1](start_span)[span_1](end_span) -->
+    <!-- Custom Game Favicon[span_0](start_span)[span_0](end_span) -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23f59e0b'/><rect x='15' y='15' width='32' height='32' rx='8' fill='%23ffffff'/><rect x='53' y='15' width='32' height='32' rx='8' fill='%23ec4899'/><rect x='15' y='53' width='32' height='32' rx='8' fill='%234f46e5'/><rect x='53' y='53' width='32' height='32' rx='8' fill='%231e293b' opacity='0.4'/></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -31,9 +31,8 @@
 </head>
 <body class="bg-gradient-to-br from-amber-950 via-slate-950 to-purple-950 text-white flex flex-col justify-between">
 
-    <!-- Full Screen Splash Screen (Clear artwork with title and smaller transparent play button) -->
-    <div id="splash-screen" class="fixed inset-0 z-50 flex flex-col justify-end items-center pb-16 px-8 bg-cover bg-center" style="background-image: url('tiles.jpg');">
-        <h1 class="text-3xl font-extrabold text-white tracking-widest mb-3 drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)] text-center">CUSTOM TILES</h1>
+    <!-- Full Screen Splash Screen (Clear artwork with lower transparent play button) -->
+    <div id="splash-screen" class="fixed inset-0 z-50 flex flex-col justify-end items-center pb-10 px-8 bg-cover bg-center" style="background-image: url('tiles.jpg');">
         <button id="start-game-btn" class="bg-transparent hover:bg-white/15 text-white font-medium text-sm py-2 px-6 rounded-xl transition transform active:scale-95 border border-white/70 shadow-[0_4px_12px_rgba(0,0,0,0.5)]">
             Play Now
         </button>
